@@ -21,6 +21,7 @@
 import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
 import videojs from "video.js";
 import type Player from "video.js/dist/types/player";
+import { useAuthStore } from "@/stores/auth";
 import "videojs-mobile-ui";
 import "videojs-hotkeys";
 import "video.js/dist/video-js.min.css";
@@ -42,6 +43,32 @@ const props = withDefaults(
 
 const source = ref(props.source);
 const sourceType = ref("");
+
+const authStore = useAuthStore();
+
+// Функции для работы с сохранением скорости воспроизведения
+const getPlaybackRateKey = () => {
+  const userId = authStore.user?.id || 'anonymous';
+  return `video-playback-rate-${userId}`;
+};
+
+const savePlaybackRate = (rate: number) => {
+  try {
+    localStorage.setItem(getPlaybackRateKey(), rate.toString());
+  } catch (error) {
+    console.warn('Failed to save playback rate:', error);
+  }
+};
+
+const loadPlaybackRate = (): number => {
+  try {
+    const saved = localStorage.getItem(getPlaybackRateKey());
+    return saved ? parseFloat(saved) : 1.0;
+  } catch (error) {
+    console.warn('Failed to load playback rate:', error);
+    return 1.0;
+  }
+};
 
 nextTick(() => {
   initVideoPlayer();
@@ -80,7 +107,21 @@ const initVideoPlayer = async () => {
       srcOpt,
       playbackRatesOpt
     );
-    player.value = videojs(videoPlayer.value!, options, () => {});
+    player.value = videojs(videoPlayer.value!, options, () => {
+      // Восстанавливаем сохраненную скорость воспроизведения
+      const savedRate = loadPlaybackRate();
+      if (savedRate !== 1.0) {
+        player.value!.playbackRate(savedRate);
+      }
+    });
+
+    // Добавляем обработчик изменения скорости воспроизведения
+    player.value!.on('ratechange', () => {
+      const currentRate = player.value!.playbackRate();
+      if (currentRate !== undefined) {
+        savePlaybackRate(currentRate);
+      }
+    });
 
     // TODO: need to test on mobile
     // @ts-expect-error no ts definition for mobileUi
