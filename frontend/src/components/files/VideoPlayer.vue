@@ -30,6 +30,11 @@ import "videojs-mobile-ui/dist/videojs-mobile-ui.css";
 const videoPlayer = ref<HTMLElement | null>(null);
 const player = ref<Player | null>(null);
 
+const emit = defineEmits<{
+  navigatePrevious: [];
+  navigateNext: [];
+}>();
+
 const props = withDefaults(
   defineProps<{
     source: string;
@@ -123,12 +128,77 @@ const initVideoPlayer = async () => {
       }
     });
 
+    // Добавляем собственный обработчик клавиш для видео
+    setupCustomKeyHandler();
+
     // TODO: need to test on mobile
     // @ts-expect-error no ts definition for mobileUi
     player.value!.mobileUi();
   } catch (error) {
     console.error("Error initializing video player:", error);
   }
+};
+
+const setupCustomKeyHandler = () => {
+  if (!player.value) return;
+
+  const videoElement = player.value.el() as HTMLVideoElement;
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    // Игнорируем, если фокус не на видео элементе или его дочерних элементах
+    if (!videoElement.contains(event.target as Node)) {
+      return;
+    }
+
+    const { key, ctrlKey, shiftKey, altKey, metaKey } = event;
+
+    // Обрабатываем только стрелки влево и вправо
+    if (key !== 'ArrowLeft' && key !== 'ArrowRight') {
+      return;
+    }
+
+    // Игнорируем комбинации с Shift или Alt
+    if (shiftKey || altKey || metaKey) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (ctrlKey) {
+      // Ctrl + стрелка: навигация между видео
+      if (key === 'ArrowLeft') {
+        emit('navigatePrevious');
+      } else if (key === 'ArrowRight') {
+        emit('navigateNext');
+      }
+    } else {
+      // Стрелка без модификаторов: перемотка видео
+      const currentTime = player.value!.currentTime();
+      const duration = player.value!.duration();
+      const seekStep = 10; // 10 секунд
+
+      if (currentTime !== undefined && duration !== undefined) {
+        if (key === 'ArrowLeft') {
+          // Перемотка назад
+          const newTime = Math.max(0, currentTime - seekStep);
+          player.value!.currentTime(newTime);
+        } else if (key === 'ArrowRight') {
+          // Перемотка вперед
+          const newTime = Math.min(duration, currentTime + seekStep);
+          player.value!.currentTime(newTime);
+        }
+      }
+    }
+  };
+
+  // Добавляем обработчик на video элемент
+  videoElement.addEventListener('keydown', handleKeyDown);
+
+  // Очищаем обработчик при размонтировании
+  onBeforeUnmount(() => {
+    videoElement.removeEventListener('keydown', handleKeyDown);
+  });
 };
 
 const getOptions = (...srcOpt: any[]) => {
@@ -147,6 +217,12 @@ const getOptions = (...srcOpt: any[]) => {
         volumeStep: 0.1,
         seekStep: 10,
         enableModifiersForNumbers: false,
+        // Отключаем стандартное поведение стрелок
+        customKeys: {
+          // Пустые обработчики для отключения стандартных стрелок
+          leftArrow: {},
+          rightArrow: {},
+        },
       },
     },
   };

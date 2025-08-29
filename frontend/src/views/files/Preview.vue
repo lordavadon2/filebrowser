@@ -105,6 +105,8 @@
           :source="previewUrl"
           :subtitles="subtitles"
           :options="videoOptions"
+          @navigate-previous="prev"
+          @navigate-next="next"
         >
         </VideoPlayer>
         <object v-else-if="isPdf" class="pdf" :data="previewUrl"></object>
@@ -347,6 +349,16 @@ const key = (event: KeyboardEvent) => {
   if (layoutStore.currentPrompt !== null) {
     return;
   }
+
+  // Для видео файлов обработка стрелок происходит в VideoPlayer компоненте
+  if (fileStore.req?.type === 'video') {
+    // Обрабатываем только Escape для закрытия
+    if (event.which === 27) {
+      close();
+    }
+    return;
+  }
+
   if (event.which === 13 || event.which === 39) {
     // right arrow
     if (hasNext.value) next();
