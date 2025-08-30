@@ -1,0 +1,72 @@
+# Multi-arch Dockerfile for FileBrowser
+# This Dockerfile supports multiple architectures using Docker Buildx
+
+# Build stage
+FROM --platform=$BUILDPLATFORM golang:1.24-alpine AS builder
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+# Install build dependencies
+RUN apk add --no-cache git ca-certificates nodejs npm pnpm
+
+WORKDIR /src
+
+# Copy go mod files
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Build frontend
+RUN cd frontend && pnpm install --frozen-lockfile && pnpm run build
+
+# Build for target platform
+RUN case $TARGETPLATFORM in \
+    "linux/amd64") GOARCH=amd64 ;; \
+    "linux/arm64") GOARCH=arm64 ;; \
+    "linux/arm/v7") GOARCH=arm ;; \
+    *) GOARCH=amd64 ;; \
+    esac && \
+    CGO_ENABLED=0 GOOS=linux GOARCH=$GOARCH go build -ldflags '-s -w' -o filebrowser .
+
+# Runtime stage
+FROM alpine:3.22
+
+# Install runtime dependencies
+RUN apk add --no-cache ca-certificates mailcap tini-static curl && \
+    wget -O /JSON.sh https://raw.githubusercontent.com/dominictarr/JSON.sh/0d5e5c77365f63809bf6e77ef44a1f34b0e05840/JSON.sh && \
+    chmod +x /JSON.sh
+
+# Create non-root user
+RUN addgroup -g 1000 filebrowser && \
+    adduser -D -u 1000 -G filebrowser filebrowser
+
+# Copy binary
+COPY --from=builder /src/filebrowser /usr/local/bin/filebrowser
+RUN chmod +x /usr/local/bin/filebrowser
+
+# Copy configuration files
+COPY docker/common/ /
+COPY docker/alpine/ /
+
+# Create directories
+RUN mkdir -p /config /database /srv && \
+    chown -R filebrowser:filebrowser /config /database /srv && \
+    chmod +x /healthcheck.sh
+
+# Health check
+# HEALTHCHECK --start-period=2s --interval=5s --timeout=3s CMD /healthcheck.sh
+
+# Switch to non-root user
+USER filebrowser
+
+# Volumes
+VOLUME /srv /config /database
+
+# Expose port
+EXPOSE 80
+
+# Entrypoint
+ENTRYPOINT ["tini-static", "--", "/init.sh"]
