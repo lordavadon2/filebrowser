@@ -8,31 +8,37 @@
 [![Version](https://img.shields.io/github/release/filebrowser/filebrowser.svg)](https://github.com/filebrowser/filebrowser/releases/latest)
 [![Chat IRC](https://img.shields.io/badge/freenode-%23filebrowser-blue.svg)](http://webchat.freenode.net/?channels=%23filebrowser)
 
-File Browser provides a file managing interface within a specified directory and it can be used to upload, delete, preview and edit your files. It is a **create-your-own-cloud**-kind of software where you can just install it on your server, direct it to a path and access your files through a nice web interface.
+Читати англійською: [README-eng.md](README-eng.md)
 
-## Documentation
+## Про форк
 
-Documentation on how to install, configure, and contribute to this project is hosted at [filebrowser.org](https://filebrowser.org).
+Цей проект є форком оригінального репозиторію [https://github.com/filebrowser/filebrowser](https://github.com/filebrowser/filebrowser). Цей проект буде поступово оновлюватися та набувати нового функціоналу.
 
-## Project Status
+File Browser надає інтерфейс управління файлами в межах зазначеного каталогу і може використовуватися для завантаження, видалення, попереднього перегляду та редагування ваших файлів. Це програмне забезпечення типу **створи-свій-власний-хмара**, де ви можете просто встановити його на своєму сервері, направити на шлях і отримати доступ до своїх файлів через приємний веб-інтерфейс.
 
-> [!WARNING]
+## Документація
+
+Документація щодо встановлення, налаштування та внеску в цей проект розміщена на [filebrowser.org](https://filebrowser.org).
+
+## Статус проекту
+
+> [!ПОПЕРЕДЖЕННЯ]
 >
-> This project is currently on **maintenance-only** mode, and is looking for new maintainers. For more information, please read the [discussion #4906](https://github.com/filebrowser/filebrowser/discussions/4906). Therefore, please note the following:
+> Цей проект наразі знаходиться в режимі **тільки обслуговування** і шукає нових супроводжувачів. Для отримання додаткової інформації, будь ласка, прочитайте [обговорення #4906](https://github.com/filebrowser/filebrowser/discussions/4906). Тому, зверніть увагу на наступне:
 >
-> - It can take a while until someone gets back to you. Please be patient.
-> - [Issues][issues] are only being used to track bugs. Any unrelated issues will be converted into a [discussion][discussions].
-> - No new features will be implemented until further notice. The priority is on triaging issues and merge bug fixes.
-> 
-> If you're interested in maintaining this project, please reach out via the discussion above.
+> - Може пройти деякий час, поки хтось відповість вам. Будь ласка, будьте терплячі.
+> - [Проблеми][issues] використовуються лише для відстеження помилок. Будь-які не пов'язані проблеми будуть перетворені в [обговорення][discussions].
+> - Нові функції не будуть реалізовані до подальшого повідомлення. Пріоритет на тріажі проблем та злитті виправлень помилок.
+>
+> Якщо ви зацікавлені в супроводженні цього проекту, будь ласка, зв'яжіться через обговорення вище.
 
 [issues]: https://github.com/filebrowser/filebrowser/issues
 [discussions]: https://github.com/filebrowser/filebrowser/discussions
 
-## Contributing
+## Внесок
 
-Contributions are always welcome. To start contributing to this project, read our [guidelines](CONTRIBUTING.md) first.
+Внески завжди вітаються. Щоб почати вносити внесок у цей проект, спочатку прочитайте наші [рекомендації](CONTRIBUTING.md).
 
-## License
+## Ліцензія
 
-[Apache License 2.0](LICENSE) © File Browser Contributors
+[Apache License 2.0](LICENSE) © Учасники File Browser
